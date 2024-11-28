@@ -7,12 +7,15 @@
 
 ## Skills and Experience
 - Senior Technical Writer with 23+ years of experience in creating and managing technical documentation, including API references, user guides, and e-learning materials.
-- Experienced in documentation project management.
-- Proficient in Generative AI tools like OpenAI products, Langchain, Flowise, and other no-code solutions for app development, content generation, and data analysis.
+- Experienced in documentation project management
+- Experienced in API documentation (REST API, OpenAPI) and docs-as-code documentation development process
 - Expertise in docs-as-code workflows, single-source publishing, and Agile methodologies.
-- Skilled in advanced tools such as Adobe FrameMaker, RoboHelp, Oxygen XML, and Readme.io.
-- Proven ability to collaborate with cross-functional teams (developers, engineers, product managers) to align documentation with business objectives.
-- Experienced in mentoring and leading documentation teams.
+- Skilled in leveraging advanced tools such as Adobe FrameMaker, RoboHelp, Oxygen XML, and Readme.io to deliver high-quality, user-focused content.
+- Proven ability to collaborate with cross-functional teams, including developers, engineers, and product managers, to align documentation with business objectives.
+- Experienced in Generative AI tools such as OpenAI products, Langchain, Flowise, Bubble and other code and no-code solutions for app development, content generation and data analysis and querying
+- Experienced with single-source-publishing using Adobe Framemaker, Authorit and Oxygen XML
+- Experienced in mentoring and leading documentation teams to improve processes and maintain documentation excellence.
+
 
 ---
 
