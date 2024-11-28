@@ -4,7 +4,7 @@ Russel Tech's IT Resume
 
 ## Objective
 
-Porting profile from hosting service to Github.
+Porting my online profile from my hosting service to Github.
 
 ## Commits and changes
 
