@@ -126,16 +126,16 @@
 
 ## Contact Information
 - **Mobile**: [+63917 633 1935](tel:+639176331935)  
-- **Email**: [russ@russel.tech](mailto:russ@russel.tech)  
+- **Email**: [russ@russel.tech](mailto:russel.tech.ph@gmail.com)  
 - **Address**: [One Oasis Ortigas Ave., Sta. Lucia, Pasig City, Philippines](https://goo.gl/maps/6hUo9J1dvdNLBBqJ6)
 
-[Call me](tel:+639176331935) | [Email me](mailto:russ@russel.tech)
+[Call me](tel:+639176331935) | [Email me](mailto:russel.tech.ph@gmail.com)
 
 ---
 
 ## Download Resumé
-- [PDF Version](https://russel.tech/resume/russeltech_resume.pdf)  
-- [Markdown Version](https://russel.tech/resume/russeltech_resume_2024.md)
+- [PDF Version](https://russel.tech/profile/resume/russeltech_resume_2024.pdf)  
+- [Markdown Version](https://russel.tech/profile/resume/russeltech_resume_2024.md)
 
 ---
 
