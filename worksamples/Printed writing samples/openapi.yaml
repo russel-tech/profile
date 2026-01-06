@@ -1,0 +1,997 @@
+openapi: 3.0.0
+info:
+  version: '1.3.0'
+  title: Next Identity API
+  description: |-
+    The Next Identity API gives brands and properties an easy approach to an identity solution that removes the need for added complexity of meeting requirements of legal, security, accessibility, etc. The API allows properties to easily integrate with the Next Identity platform and also benefit from the governance and security that is already built into the service. Some of the main benefits of this Next Identity API include:
+
+    * Centralized consent management and communication preferences
+    * Self-service onboarding via config API
+    * Simplifies compliance for GDPR
+    * API Security and monitoring
+    * Aggregation of logging and reporting
+    * Automated functional testing - including regression tests
+    * Mitigation of noisy neighbor effects by granular rate limiting and monitoring
+    * Control over data compliance, scope, and data quality (validation)
+    * Minimize the configuration complexity
+  contact: {}
+paths:
+  /account/login:
+    post:
+      description: On login success this endpoint will return an authorization code used to authenticate users.
+      summary: Login
+      tags:
+        - Account
+      operationId: Login
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: LoginRequest
+              type: object
+              properties:
+                auth_type:
+                  $ref: '#/components/schemas/auth_type'
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                grant_type:
+                  $ref: '#/components/schemas/auth_grant_type'
+                password:
+                  $ref: '#/components/schemas/password'
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+                user_id:
+                  $ref: '#/components/schemas/user_id'
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+                scope:
+                  $ref: '#/components/schemas/scope'
+              required:
+                - auth_type
+                - client_id
+                - grant_type
+                - password
+                - redirect_uri
+                - user_id
+        required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                title: LoginResponse
+                example:
+                  authorization_code: SlAV32hkKG
+                  message: 'Warning: you should accept all legal terms.'
+                type: object
+                properties:
+                  authorization_code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - authorization_code
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security: []
+  /account/logout:
+    post:
+      description: The access token is revoked on a successful `/logout` call. This endpoint requires the access token to be sent as a bearer token, in the `Authorization` header. This API call revokes a single access token for a user. To invalidate all sessions, the `all_sessions` parameter must be included and set to `true`. The refresh token is required to be passed as part of the call so that it can be invalidated as well. This API endpoint is intended for Next Identity API integration only.
+      summary: Logout
+      tags:
+        - Account
+      operationId: Logout
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: LogoutRequest
+              type: object
+              properties:
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                all_sessions:
+                  $ref: '#/components/schemas/all_sessions'
+                grant_type:
+                  type: string
+                  enum:
+                    - refresh_token
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+                refresh_token:
+                  $ref: '#/components/schemas/refresh_token'
+              required:
+                - auth_type
+                - client_id
+                - user_id
+        required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security:
+        - access_token_auth: []
+  /account/register:
+    post:
+      summary: Register
+      description: This endpoint will create a new profile for the end-user. Depending on the authentication type, the PIN will be sent via email or SMS message after the correct registration. The new password is validated against a repository of known database breaches for additional protection. Both `authorization_code` and `uuid` are optional in the `200` status code response.  
+      tags:
+        - Account
+      operationId: Register
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: RegisterRequest
+              type: object
+              properties:
+                auth_type:
+                  $ref: '#/components/schemas/auth_type'
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                grant_type:
+                  $ref: '#/components/schemas/auth_grant_type'
+                profile_fields:
+                  $ref: '#/components/schemas/profile_fields'    
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+                legal_acceptances:
+                  $ref: '#/components/schemas/legal_acceptances'                
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+                scope:
+                  $ref: '#/components/schemas/scope'
+
+                site_identifier:
+                  type: string
+                  description: Used when honeypot CAPTCHA is set to `true`.
+              required:
+                - auth_type
+                - client_id
+                - grant_type
+                - profile_fields
+                - redirect_uri
+        required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                title: RegisterResponse
+                example:
+                  authorization_code: MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3
+                  uuid: 69ed0122-f2d9-4c6e-a636-3670cab4f15f
+                type: object
+                properties:
+                  authorization_code:
+                    type: string
+                  uuid:
+                    type: string
+                additionalProperties: false
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security: []
+  /account/forgot-password:
+    post:
+      summary: Forgot Password
+      description: This endpoint will initiate the password reset workflow by sending either an email or SMS message to guide the user through resetting their password.
+      tags:
+        - Account
+      operationId: ForgotPassword
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: ForgotPasswordRequest
+              type: object
+              properties:
+                auth_type:
+                  $ref: '#/components/schemas/auth_type'
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+                user_id:
+                  $ref: '#/components/schemas/user_id'
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+              required:
+                - auth_type
+                - client_id
+                - redirect_uri
+                - user_id
+        required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security: []
+  /account/change-password:
+    post:
+      summary: Change Password
+      description: This endpoint facilitates the changing of an end user's password. One can choose to confirm their existing password prior to updating. Based on client settings configuration this endpoint will also check against a users previously saved passwords to prevent password reuse. The new password is validated against a repository of known database breaches for additional protection.
+      tags:
+        - Account
+      operationId: ChangePassword
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: ChangePasswordRequest
+              type: object
+              properties:
+                auth_type:
+                  $ref: '#/components/schemas/auth_type'
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                password:
+                  $ref: '#/components/schemas/password'
+                password_confirm:
+                  type: string
+                  description: Must match the `password` parameter.
+                  format: password
+                user_id:
+                  $ref: '#/components/schemas/user_id'
+                current_password:
+                  type: string
+                  description: Current password. This optional parameter will check against the user's current profile if passed.
+                  format: password
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+              required:
+                - auth_type
+                - client_id
+                - password
+                - password_confirm
+                - user_id
+        required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security:
+        - access_token_auth: []
+  /account/token:
+    post:
+      summary: Token
+      description: This endpoint consumes an authorization code and passes back an access token for a user.
+      tags:
+        - Account
+      operationId: Token
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: TokenRequest
+              type: object
+              properties:
+                auth_type:
+                  $ref: '#/components/schemas/auth_type'
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                grant_type:
+                  $ref: '#/components/schemas/grant_type'
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+                user_id:
+                  $ref: '#/components/schemas/user_id'
+                code:
+                  title: code
+                  type: string
+                  description: The authorization code.
+                legal_acceptances:
+                  $ref: '#/components/schemas/legal_acceptances'
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+                refresh_token:
+                  $ref: '#/components/schemas/refresh_token'
+              required:
+                - auth_type
+                - client_id
+                - grant_type
+                - redirect_uri
+                - user_id
+        required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                title: TokenResponse
+                example:
+                  access_token: MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3
+                  token_type: bearer
+                  expires_in: 3600
+                  refresh_token: IwOGYzYTlmM2YxOTQ5MGE3YmNmMDFkNTVk
+                  scope: create
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  expires_in:
+                    type: integer
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+                  id_token:
+                    type: string
+                  scope:
+                    type: string
+                required:
+                  - access_token
+                  - token_type
+                  - expires_in
+                  - refresh_token
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security: []
+  /account/profile:
+    get:
+      summary: Get Profile
+      description: This endpoint will return a user's profile information.
+      tags:
+        - Account
+      operationId: GetProfile
+      deprecated: false
+      parameters:
+        - name: client_id
+          in: query
+          required: true
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security:
+        - access_token_auth: []
+    put:
+      summary: Update Profile
+      description: This endpoint will update a user's profile information. Profile fields available for updating are defined in the client's settings.
+      tags:
+        - Account
+      operationId: UpdateProfile
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UpdateProfileRequest
+              type: object
+              properties:
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                profile_fields:
+                  type: object
+                  description: Required key-value pairs for populating a user's profile. This is defined in the `forms_config` setting for `editProfileForm` and can vary.
+                  additionalProperties: true
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+              required:
+                - client_id
+                - profile_fields
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                title: UpdateProfileResponse
+                type: object
+                properties:
+                  stat:
+                    type: string
+                additionalProperties: false
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security:
+        - access_token_auth: []
+  /account/resend-verification:
+    post:
+      summary: Resend Verification
+      description: This endpoint will initiate a new verification email or SMS message for an unverified user profile. This endpoint uses the specific client configurations to determine whether email or SMS should be sent to the user.
+      tags:
+        - Account
+      operationId: ResendVerification
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: ResendVerificationRequest
+              type: object
+              properties:
+                auth_type:
+                  $ref: '#/components/schemas/auth_type'
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+                user_id:
+                  $ref: '#/components/schemas/user_id'
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+              required:
+                - auth_type
+                - client_id
+                - redirect_uri
+                - user_id
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security: []
+  /otp/send:
+    post:
+      summary: Send OTP
+      description: This endpoint will send a six digit numeric code to a user via either email or SMS depending on chosen `auth_type`.
+      tags:
+        - Account
+      operationId: SendOTP
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: SendOTPRequest
+              type: object
+              properties:
+                auth_type:
+                  $ref: '#/components/schemas/auth_type'
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+                user_id:
+                  $ref: '#/components/schemas/user_id'
+                locale:
+                  $ref: '#/components/schemas/locale'
+                message:
+                  type: string
+                  description: SMS Only. Optional parameter that will overwrite SMS message defined in settings.
+                options:
+                  $ref: '#/components/schemas/options'
+                developer_mode:
+                  $ref: '#/components/schemas/developer_mode'
+              required:
+                - auth_type
+                - client_id
+                - redirect_uri
+                - user_id
+        required: true
+      security:
+        - access_token_auth: []
+      responses:
+        '200':
+          description: ''
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+  /otp/verify:
+    post:
+      summary: Verify OTP
+      description: This endpoint takes an OTP code and confirms its validity.
+      tags:
+        - Account
+      operationId: VerifyOTP
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: VerifyOTPRequest
+              type: object
+              properties:
+                auth_type:
+                  $ref: '#/components/schemas/auth_type'
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                code:
+                  title: code
+                  type: string
+                  description: The OTP code from OTP Send response.
+                redirect_uri:
+                  $ref: '#/components/schemas/redirect_uri'
+                user_id:
+                  $ref: '#/components/schemas/user_id'
+                locale:
+                  $ref: '#/components/schemas/locale'
+                options:
+                  $ref: '#/components/schemas/options'
+              required:
+                - auth_type
+                - client_id
+                - code
+                - redirect_uri
+                - user_id
+        required: true
+      security:
+        - access_token_auth: []
+      responses:
+        '200':
+          description: ''
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+  /account/users/find:
+    get:
+      summary: User Find for Web Apps and M2M
+      tags:
+        - Users
+      operationId: FindUser
+      deprecated: false
+      parameters:
+        - name: client_id
+          in: query
+          required: true
+          description: 'Property identifier for your organization and application, it will be provided to you by Next Reason support team.'
+          schema:
+            type: string
+        - name: attributes
+          in: query
+          required: false
+          description: Attributes to be returned. All are returned by default if omitted. Format is an array of attributes.
+          style: form
+          explode: false
+          schema:
+            type: string
+        - name: query_filter
+          in: query
+          required: false
+          description: 'Expression used to filter the result. By default, all records are returned.'
+          schema:
+            type: string
+        - name: max_results
+          in: query
+          required: false
+          description: Number of results to return.
+          schema:
+            type: integer
+        - name: sort_on
+          in: query
+          required: false
+          description: Array of attributes used to specify the sort order. A minus sign (-) directly in front of the attribute will sort in descending order.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                title: FindUserResponse
+                example:
+                  results:
+                    - uuid: 21234-9cb2-48c9-84f4-414ff235dd89
+                      id: 263823
+                  result_count: 100
+                  total_count: 119
+                  stat: ok
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      x-examples:
+                        example-1:
+                          uuid: 21234-9cb2-48c9-84f4-414ff235dd89
+                          id: 263823
+                  result_count:
+                    type: integer
+                    format: int32
+                  total_count:
+                    type: integer
+                    format: int32
+                  stat:
+                    type: string
+                required:
+                  - results
+                  - result_count
+                  - total_count
+                  - stat
+              examples:
+                response:
+                  value:
+                    results:
+                      - uuid: 21234-9cb2-48c9-84f4-414ff235dd89
+                        id: 263823
+                    result_count: 100
+                    total_count: 119
+                    stat: ok
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security:
+        - client_auth: []
+  /account/users/update:
+    put:
+      summary: User Update for Web Apps and M2M
+      tags:
+        - Users
+      operationId: UpdateUser
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UpdateUserRequest
+              type: object
+              properties:
+                client_id:
+                  $ref: '#/components/schemas/client_id'
+                attribute_name:
+                  type: string
+                  description: Defines the object or plural to update. The default is the root level.
+                attributes:
+                  type: object
+                  additionalProperties: true
+                  description: JSON value to update user record. This is used in lieu of `value` parameter.
+                key_property:
+                  type: string
+                  description: Name of a unique attribute used to locate a record. Required if you are not using the `uuid` parameter.
+                key_value:
+                  type: string
+                  description: Value of the `key_property` parameter.
+                uuid:
+                  type: string
+                  description: UUID for the user record. Required if you are not using the `key_property` parameter.
+                value:
+                  type: string
+                  description: 'JSON value to be assigned to the `attribute_name` parameter. Can be a single value such as ''John'', or contain JSON pairs for example: `{''firstName'':''John'',''lastName'': ''Smith''}`.'
+              required:
+                - client_id
+        required: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+      security:
+        - client_auth: []
+servers:
+  - url: 'https://{domain}/idp/{version}'
+    variables:
+      domain:
+        default: id.eu.nextreason.com
+      version:
+        default: v1
+components:
+  securitySchemes:
+    client_auth:
+      type: http
+      scheme: basic
+    access_token_auth:
+      type: http
+      scheme: bearer
+  schemas:
+    all_sessions:
+      type: boolean
+      description: Flag that indicates if all the user sessions should be revoked.
+    refresh_token:
+      type: string
+      description: The refresh access token.
+    auth_type:
+      type: string
+      enum:
+        - email
+        - sms
+      description: Used to identify the authentication type to be used for a particular user.
+    client_id:
+      type: string
+      description: 'Property identifier for your organization and application, it will be provided to you by Next Reason support team.'
+    auth_grant_type:
+      type: string
+      enum:
+        - password
+      description: Type of credential to use for login
+    grant_type:
+      type: string
+      enum:
+        - authorization_code
+        - pin
+        - refresh_token
+      description: Type of credential to obtain an access token.
+    locale:
+      type: string
+      description: 'Language to use for transational messages. examples: `en-US`, `fr-FR`. This defaults to the value of the `default_locale` if not passed. If no setting is defined then it will default to `en-US`.'
+    options:
+      title: Options
+      type: object
+      properties:
+        flow:
+          type: string
+        flow_version:
+          type: string
+        form:
+          type: string
+      description: Optional set of fields used for custom integrations. Values can be requested from Next Reason support team.
+    password:
+      type: string
+      description: Must be 8 characters with 1 uppercase and 1 number
+      format: password
+    redirect_uri:
+      type: string
+      description: Where the authorization server sends the user once they have been authorized. Must be configured on your client's allowlist.
+    scope:
+      type: string
+      enum:
+        - openid
+      description: Defines format of response. Usually `openid`
+    user_id:
+      type: string
+      description: 'The user''s unique identifier, which can be either email or mobile number based on what is passed in the `auth_type`.'
+    legal_acceptances:
+      type: boolean
+      description: Used to indicate that the user has accepted the latest version of the T&Cs and PPs. Defaults to false if not passed.
+    profile_fields:
+      type: object
+      description: Required key-value pairs for populating a user's profile. This is defined in the `forms_config` setting for `registrationForm` and can vary.
+      additionalProperties: true
+    developer_mode:
+      type: boolean
+      description: Optional parameter that when enabled together with the `allow_developer_mode` in the client setting, will return the generated code as a JSON response and will not send an SMS message or email. Defaults value is false.
+      default: false
+    ErrorResponse:
+      title: ErrorResponse
+      example:
+        error: something bad happened
+        error_description: something bad happened
+        error_details:
+          message: this is a description of the error
+      type: object
+      properties:
+        error:
+          type: string
+        error_details:
+          type: object
+          additionalProperties: true
+        error_description:
+          type: string
+      required:
+        - error
+        - error_details
+  responses:
+    '403':
+      description: Forbidden
+      headers:
+        X-Request-Id:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            title: 403 Forbidden
+            example:
+              error: http_exception
+              error_description: unauthorized access
+              error_details:
+                message: non-whitelisted `redirect_uri`
+            type: object
+            properties:
+              error:
+                type: string
+              error_details:
+                type: object
+                additionalProperties: true
+              error_description:
+                type: string
+            required:
+              - error
+              - error_details
+    '422':
+      description: Unprocessible Entity
+      headers:
+        X-Request-Id:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            title: 422 Unprocessable Entity
+            example:
+              error: invalid_parameters
+              error_description: Invalid value
+              error_details:
+                message: Empty or incorrect `redirect_uri` value
+            type: object
+            properties:
+              error:
+                type: string
+              error_details:
+                type: object
+                additionalProperties: true
+              error_description:
+                type: string
+            required:
+              - error
+              - error_details
+    '429':
+      description: Too Many Requests
+      headers:
+        X-Request-Id:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+x-readme:
+  explorer-enabled: true
+  proxy-enabled: true
+  samples-enabled: true
+tags:
+  - name: Account
+  - name: Users
