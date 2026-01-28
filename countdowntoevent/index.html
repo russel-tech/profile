@@ -2,263 +2,216 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Event Countdown Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MyEvents">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#da0037">
+
+    <title>Event Countdown</title>
     <style>
         :root {
-            /* Updated Colors */
-            --primary: #da0037;       /* Deep Red */
-            --primary-hover: #56af5f; /* Green */
-            
+            --primary: #da0037;
+            --primary-hover: #b9002d;
             --bg: #f3f4f6;
             --card-bg: #ffffff;
             --text-main: #171717;
             --text-muted: #525252;
-            --danger: #ef4444;
         }
 
         body {
-            font-family: -apple-system, "Oswald", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            padding: 2rem;
+            padding: 1rem;
             min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
+        /* --- LOGIN OVERLAY STYLES --- */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            box-sizing: border-box;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        h1 {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 1.25rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
-        }
-
-        /* --- Pronounced Live Clock --- */
-        .live-clock {
-            font-size: 3rem; /* Much larger */
-            font-weight: 800; /* Bold */
-            color: var(--text-main);
-            line-height: 1.1;
-            font-variant-numeric: tabular-nums;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.05);
-        }
-
-        /* --- Input Form Section --- */
-        .add-event-card {
+        .login-card {
             background: var(--card-bg);
             padding: 2rem;
             border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            margin-bottom: 3rem;
-            border-top: 4px solid var(--primary); /* Accent bar */
-        }
-
-        .input-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        input {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
-            padding: 0.875rem;
+            max-width: 320px;
+            text-align: center;
+        }
+
+        .login-title {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 5px;
             border: 2px solid #e5e5e5;
             border-radius: 8px;
-            font-size: 1rem;
+            margin-bottom: 1rem;
             box-sizing: border-box;
             outline: none;
-            transition: border-color 0.2s;
         }
 
-        input:focus {
+        .pin-input:focus {
             border-color: var(--primary);
         }
 
-        button.add-btn {
+        .unlock-btn {
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 0.875rem 2rem;
+            padding: 1rem;
+            width: 100%;
             border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 140px;
-        }
-
-        button.add-btn:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(86, 175, 95, 0.3);
-        }
-
-        /* --- Event List Grid --- */
-        .events-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .event-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            position: relative;
-            transition: transform 0.2s;
-            border-left: 4px solid transparent;
-        }
-
-        .event-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
-            border-left-color: var(--primary);
-        }
-
-        .event-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.25rem;
-        }
-
-        .event-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 0;
-            word-break: break-word;
-        }
-
-        .event-date {
-            font-size: 0.95rem;
-            color: var(--primary); /* Using primary color for target date */
-            font-weight: 600;
-            margin-top: 0.25rem;
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #d1d5db;
-            cursor: pointer;
-            font-size: 1.5rem;
-            padding: 0;
-            line-height: 1;
-            transition: color 0.2s;
-        }
-
-        .delete-btn:hover {
-            color: var(--primary);
-        }
-
-        /* Timer Digits styling */
-        .timer-display {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.5rem;
-            text-align: center;
-            background: #fff1f2; /* Light red tint bg */
-            padding: 1rem 0.5rem;
-            border-radius: 8px;
-        }
-
-        .time-unit {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .unit-value {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--primary);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .unit-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .event-finished {
-            text-align: center;
-            color: var(--primary-hover); /* Green for success/finished */
+            font-size: 1.1rem;
             font-weight: bold;
-            font-size: 1.25rem;
-            padding: 1rem 0;
-            background: #f0fdf4;
-            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .error-msg {
+            color: #ef4444;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: none;
         }
 
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 4rem;
-            color: var(--text-muted);
-            font-style: italic;
-            border: 2px dashed #e5e5e5;
-            border-radius: 12px;
+        /* --- APP CONTENT (Hidden initially) --- */
+        #appContent {
+            display: none; /* Hidden until unlocked */
         }
+
+        /* [Rest of the Styles from previous version] */
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 50px; }
+        header { text-align: center; margin-bottom: 2rem; margin-top: 1rem; }
+        h1 { margin: 0; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem; }
+        .live-clock { font-size: 2rem; font-weight: 800; color: var(--text-main); line-height: 1.1; }
+        .add-event-card { background: var(--card-bg); padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; border-top: 4px solid var(--primary); }
+        .input-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; }
+        input.app-input { width: 100%; padding: 0.8rem; border: 2px solid #e5e5e5; border-radius: 8px; font-size: 1rem; box-sizing: border-box; background: #fff; -webkit-appearance: none; }
+        input.app-input:focus { border-color: var(--primary); outline: none; }
+        button.add-btn { background-color: var(--primary); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1rem; font-weight: 700; width: 100%; cursor: pointer; margin-top: 0.5rem; box-shadow: 0 4px 6px rgba(218, 0, 55, 0.2); }
+        button.add-btn:active { transform: scale(0.98); }
+        .events-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .event-card { background: var(--card-bg); border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; border-left: 4px solid transparent; }
+        .event-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .event-title { font-size: 1.2rem; font-weight: 700; margin: 0; }
+        .event-date { font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-top: 0.25rem; }
+        .delete-btn { background: none; border: none; color: #d1d5db; font-size: 1.5rem; padding: 0 0 0 1rem; }
+        .timer-display { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.25rem; text-align: center; background: #fff1f2; padding: 0.75rem 0.25rem; border-radius: 8px; }
+        .unit-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+        .unit-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-style: italic; border: 2px dashed #e5e5e5; border-radius: 12px; }
+        .event-finished { text-align: center; color: #16a34a; font-weight: bold; padding: 0.5rem; background: #dcfce7; border-radius: 8px; }
     </style>
-
 </head>
 <body>
 
-    <div class="container">
+    <div id="loginOverlay">
+        <div class="login-card">
+            <h2 class="login-title">Locked</h2>
+            <input type="tel" id="pinInput" class="pin-input" placeholder="PIN" maxlength="4" autocomplete="off">
+            <button class="unlock-btn" onclick="checkPin()">Unlock</button>
+            <div id="loginError" class="error-msg">Incorrect PIN</div>
+        </div>
+    </div>
+
+    <div id="appContent" class="container">
         <header>
             <h1>Current Time</h1>
-            <div id="liveClock" class="live-clock">Loading...</div>
+            <div id="liveClock" class="live-clock">...</div>
         </header>
 
         <div class="add-event-card">
             <div class="input-group">
-                <label for="eventName">Event Name</label>
-                <input type="text" id="eventName" placeholder="e.g., Project Deadline">
+                <label>Event Name</label>
+                <input type="text" id="eventName" class="app-input" placeholder="e.g. Birthday">
             </div>
             <div class="input-group">
-                <label for="eventDate">Date & Time</label>
-                <input type="datetime-local" id="eventDate">
+                <label>Date & Time</label>
+                <input type="datetime-local" id="eventDate" class="app-input">
             </div>
-            <button class="add-btn" onclick="addEvent()">Add Event</button>
+            <button class="add-btn" onclick="addEvent()">+ Add Event</button>
         </div>
 
-        <div id="eventsGrid" class="events-grid">
-            </div>
+        <div id="eventsGrid" class="events-grid"></div>
     </div>
 
     <script>
-        // --- State Management ---
+        // --- CONFIGURATION ---
+        const APP_PIN = "0503"; // <--- CHANGE YOUR PASSWORD HERE
+        // ---------------------
+
+        const STORAGE_KEY = 'mobile_countdowns_v2'; 
         let events = [];
 
+        // --- AUTH LOGIC ---
+        const pinInput = document.getElementById('pinInput');
+        const loginError = document.getElementById('loginError');
+
+        // Check PIN on Enter key
+        pinInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                checkPin();
+            }
+        });
+
+        function checkPin() {
+            if (pinInput.value === APP_PIN) {
+                // Success
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+                // Initialize app
+                initApp();
+            } else {
+                // Fail
+                loginError.style.display = 'block';
+                pinInput.value = '';
+                pinInput.focus();
+            }
+        }
+
+        // --- APP LOGIC ---
+        function initApp() {
+            // Set min date
+            const nowLocal = new Date();
+            nowLocal.setMinutes(nowLocal.getMinutes() - nowLocal.getTimezoneOffset());
+            document.getElementById('eventDate').min = nowLocal.toISOString().slice(0, 16);
+
+            loadEvents();
+            // Start clock and timers
+            setInterval(updateTimers, 1000);
+            updateTimers(); // immediate run
+        }
+
         function loadEvents() {
-            const stored = localStorage.getItem('my_countdowns_v2');
+            const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 events = JSON.parse(stored);
                 renderEvents();
@@ -268,156 +221,103 @@
         }
 
         function saveEvents() {
-            localStorage.setItem('my_countdowns_v2', JSON.stringify(events));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
         }
 
-        // --- Core Logic ---
         function addEvent() {
             const nameInput = document.getElementById('eventName');
             const dateInput = document.getElementById('eventDate');
-
             const name = nameInput.value.trim();
             const dateStr = dateInput.value;
 
-            if (!name) {
-                alert("Please enter an event name.");
-                return;
-            }
-            if (!dateStr) {
-                alert("Please select a date and time.");
+            if (!name || !dateStr) {
+                alert("Please fill in both fields.");
                 return;
             }
 
-            const newEvent = {
-                id: Date.now(),
-                name: name,
-                date: dateStr
-            };
-
-            events.push(newEvent);
+            events.push({ id: Date.now(), name: name, date: dateStr });
             saveEvents();
-            
             nameInput.value = '';
             dateInput.value = '';
-            
             renderEvents();
         }
 
         function deleteEvent(id) {
-            if(confirm('Delete this countdown?')) {
+            if(confirm('Remove this event?')) {
                 events = events.filter(e => e.id !== id);
                 saveEvents();
-                if (events.length === 0) {
-                    renderEmptyState();
-                } else {
-                    renderEvents();
-                }
+                renderEvents();
             }
         }
 
-        // --- Rendering ---
         function renderEmptyState() {
-            const grid = document.getElementById('eventsGrid');
-            grid.innerHTML = `<div class="empty-state">No countdowns running. Add a new event to get started.</div>`;
+            document.getElementById('eventsGrid').innerHTML = 
+                `<div class="empty-state">No events yet.<br>Add one above!</div>`;
         }
 
         function renderEvents() {
             const grid = document.getElementById('eventsGrid');
+            if (events.length === 0) { renderEmptyState(); return; }
+            
             grid.innerHTML = '';
-
-            // Sort by date
             events.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             events.forEach(event => {
                 const dateObj = new Date(event.date);
-                // Format: Jan 24, 2024 at 10:30 PM
-                const dateDisplay = dateObj.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) + 
-                                  ' at ' + 
-                                  dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const dateDisplay = dateObj.toLocaleDateString(undefined, { month:'short', day:'numeric' }) + 
+                                  ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
                 const card = document.createElement('div');
                 card.className = 'event-card';
                 card.innerHTML = `
                     <div class="event-header">
                         <div>
-                            <h3 class="event-title">${event.name}</h3>
+                            <div class="event-title">${event.name}</div>
                             <div class="event-date">${dateDisplay}</div>
                         </div>
-                        <button class="delete-btn" onclick="deleteEvent(${event.id})" title="Delete">&times;</button>
+                        <button class="delete-btn" onclick="deleteEvent(${event.id})">×</button>
                     </div>
-                    <div id="timer-${event.id}" class="timer-wrapper">
-                        </div>
+                    <div id="timer-${event.id}"></div>
                 `;
                 grid.appendChild(card);
             });
             updateTimers();
         }
 
-        // --- The Ticking Heart ---
         function updateTimers() {
             const nowObj = new Date();
             const now = nowObj.getTime();
 
-            // 1. Update the Main Clock (Pronounced Date)
-            // Options to make date very clear
-            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            
-            // Combining them into one big string
             document.getElementById('liveClock').innerHTML = 
-                nowObj.toLocaleDateString('en-US', dateOptions) + '<br>' + 
-                '<span style="font-size: 0.6em; color: var(--primary);">' + nowObj.toLocaleTimeString('en-US', timeOptions) + '</span>';
+                nowObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + 
+                '<span style="font-size:0.5em; display:block; color:var(--primary); font-weight:600">' + 
+                nowObj.toLocaleDateString(undefined, { weekday:'short', month:'long', day:'numeric' }) + '</span>';
 
-            // 2. Update Countdowns
             events.forEach(event => {
-                const target = new Date(event.date).getTime();
-                const distance = target - now;
                 const container = document.getElementById(`timer-${event.id}`);
-
-                if (!container) return; 
+                if (!container) return;
+                const distance = new Date(event.date).getTime() - now;
 
                 if (distance < 0) {
-                    container.innerHTML = `<div class="event-finished">Event Reached!</div>`;
+                    container.innerHTML = `<div class="event-finished">Done!</div>`;
                 } else {
-                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                    const pad = (num) => num < 10 ? '0'+num : num;
+                    const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((distance % (1000 * 60)) / 1000);
+                    const pad = n => n < 10 ? '0'+n : n;
 
                     container.innerHTML = `
                         <div class="timer-display">
-                            <div class="time-unit">
-                                <span class="unit-value">${days}</span>
-                                <span class="unit-label">Days</span>
-                            </div>
-                            <div class="time-unit">
-                                <span class="unit-value">${pad(hours)}</span>
-                                <span class="unit-label">Hrs</span>
-                            </div>
-                            <div class="time-unit">
-                                <span class="unit-value">${pad(minutes)}</span>
-                                <span class="unit-label">Min</span>
-                            </div>
-                            <div class="time-unit">
-                                <span class="unit-value">${pad(seconds)}</span>
-                                <span class="unit-label">Sec</span>
-                            </div>
+                            <div class="time-unit"><div class="unit-value">${d}</div><div class="unit-label">Days</div></div>
+                            <div class="time-unit"><div class="unit-value">${pad(h)}</div><div class="unit-label">Hrs</div></div>
+                            <div class="time-unit"><div class="unit-value">${pad(m)}</div><div class="unit-label">Min</div></div>
+                            <div class="time-unit"><div class="unit-value">${pad(s)}</div><div class="unit-label">Sec</div></div>
                         </div>
                     `;
                 }
             });
         }
-
-        // Initialize
-        const nowLocal = new Date();
-        nowLocal.setMinutes(nowLocal.getMinutes() - nowLocal.getTimezoneOffset());
-        document.getElementById('eventDate').min = nowLocal.toISOString().slice(0, 16);
-
-        loadEvents();
-        setInterval(updateTimers, 1000);
-
     </script>
 </body>
 </html>
