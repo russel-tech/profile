@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Countdown Timer</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+
+        /* Styling the datetime picker */
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            color: #374151;
+            outline: none;
+            transition: border-color 0.2s;
+            cursor: pointer;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        input[type="datetime-local"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Grid for the countdown boxes */
+        .countdown-grid {
+            display: none; /* Hidden until date selected */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .time-box {
+            background-color: #eff6ff;
+            padding: 1rem 0.25rem;
+            border-radius: 8px;
+            border: 1px solid #bfdbfe;
+            min-width: 80px;
+        }
+
+        .number {
+            display: block;
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+            font-variant-numeric: tabular-nums; /* Prevents jumping numbers */
+        }
+
+        .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        /* Message areas */
+        .message {
+            display: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+        
+        .message.success { color: #059669; } /* Green */
+        .message.past { color: #dc2626; }    /* Red */
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Time Until Event</h1>
+        
+        <div class="input-group">
+            <label for="datetimeInput">Select Date & Time:</label>
+            <input type="datetime-local" id="datetimeInput">
+        </div>
+
+        <div id="countdown" class="countdown-grid">
+            <div class="time-box">
+                <span class="number" id="days">0</span>
+                <span class="label">Days</span>
+            </div>
+            <div class="time-box">
+                <span class="number" id="hours">0</span>
+                <span class="label">Hours</span>
+            </div>
+            <div class="time-box">
+                <span class="number" id="minutes">0</span>
+                <span class="label">Minutes</span>
+            </div>
+            <div class="time-box">
+                <span class="number" id="seconds">0</span>
+                <span class="label">Seconds</span>
+            </div>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        const datetimeInput = document.getElementById('datetimeInput');
+        const countdownGrid = document.getElementById('countdown');
+        const messageDiv = document.getElementById('message');
+        
+        const els = {
+            days: document.getElementById('days'),
+            hours: document.getElementById('hours'),
+            minutes: document.getElementById('minutes'),
+            seconds: document.getElementById('seconds')
+        };
+
+        let countdownInterval;
+
+        // Helper to format date for the input's "min" attribute (YYYY-MM-DDTHH:mm)
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        datetimeInput.min = now.toISOString().slice(0, 16);
+
+        datetimeInput.addEventListener('change', function() {
+            startCountdown(this.value);
+        });
+
+        function startCountdown(targetDateStr) {
+            // Clear any existing interval
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            // If input is cleared, hide everything
+            if (!targetDateStr) {
+                countdownGrid.style.display = 'none';
+                messageDiv.style.display = 'none';
+                return;
+            }
+
+            // Get target time in milliseconds
+            const targetTime = new Date(targetDateStr).getTime();
+
+            function update() {
+                const now = new Date().getTime();
+                const distance = targetTime - now;
+
+                // Check if time is up
+                if (distance < 0) {
+                    countdownGrid.style.display = 'none';
+                    messageDiv.style.display = 'block';
+                    messageDiv.textContent = "The event time has passed.";
+                    messageDiv.className = "message past";
+                    
+                    clearInterval(countdownInterval);
+                    return;
+                }
+
+                // Show grid, hide message
+                countdownGrid.style.display = 'grid';
+                messageDiv.style.display = 'none';
+
+                // Time calculations
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Update DOM with zero-padding (e.g., "05" instead of "5")
+                els.days.textContent = days;
+                els.hours.textContent = hours < 10 ? '0' + hours : hours;
+                els.minutes.textContent = minutes < 10 ? '0' + minutes : minutes;
+                els.seconds.textContent = seconds < 10 ? '0' + seconds : seconds;
+            }
+
+            // Run immediately, then every second
+            update();
+            countdownInterval = setInterval(update, 1000);
+        }
+    </script>
+</body>
+</html>
