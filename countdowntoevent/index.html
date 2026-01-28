@@ -3,224 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Countdown Timer</title>
+    <title>Multi-Event Countdown Manager</title>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --bg-color: #f3f4f6;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f3f4f6;
             --card-bg: #ffffff;
-            --text-color: #1f2937;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --danger: #ef4444;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: var(--bg);
+            color: var(--text-main);
             margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
         }
 
         .container {
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            width: 100%;
-            max-width: 550px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
             text-align: center;
+            margin-bottom: 2rem;
         }
 
         h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-color);
+            margin: 0;
+            color: var(--primary);
+        }
+
+        /* --- Input Form Section --- */
+        .add-event-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 2rem;
         }
 
         .input-group {
-            margin-bottom: 2rem;
-            text-align: left;
+            flex: 1;
+            min-width: 200px;
         }
 
         label {
             display: block;
             margin-bottom: 0.5rem;
+            font-size: 0.875rem;
             font-weight: 500;
-            color: #4b5563;
+            color: var(--text-muted);
         }
 
-        /* Styling the datetime picker */
-        input[type="datetime-local"] {
+        input {
             width: 100%;
             padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            color: #374151;
-            outline: none;
-            transition: border-color 0.2s;
-            cursor: pointer;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
             box-sizing: border-box;
-            font-family: inherit;
+            outline: none;
         }
 
-        input[type="datetime-local"]:focus {
-            border-color: var(--primary-color);
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        /* Grid for the countdown boxes */
-        .countdown-grid {
-            display: none; /* Hidden until date selected */
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        .time-box {
-            background-color: #eff6ff;
-            padding: 1rem 0.25rem;
-            border-radius: 8px;
-            border: 1px solid #bfdbfe;
-            min-width: 80px;
-        }
-
-        .number {
-            display: block;
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: var(--primary-color);
-            line-height: 1;
-            margin-bottom: 0.25rem;
-            font-variant-numeric: tabular-nums; /* Prevents jumping numbers */
-        }
-
-        .label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #6b7280;
+        button.add-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
             font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            min-width: 120px;
         }
 
-        /* Message areas */
-        .message {
-            display: none;
+        button.add-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* --- Event List Grid --- */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .event-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .event-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            word-break: break-word;
+        }
+
+        .event-date {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .delete-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Timer Digits styling */
+        .timer-display {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            text-align: center;
+            background: #eff6ff;
+            padding: 1rem 0.5rem;
+            border-radius: 8px;
+        }
+
+        .time-unit {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .unit-value {
             font-size: 1.5rem;
-            font-weight: bold;
-            margin-top: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-variant-numeric: tabular-nums;
         }
-        
-        .message.success { color: #059669; } /* Green */
-        .message.past { color: #dc2626; }    /* Red */
 
+        .unit-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .event-finished {
+            text-align: center;
+            color: #059669;
+            font-weight: bold;
+            font-size: 1.25rem;
+            padding: 1rem 0;
+            background: #ecfdf5;
+            border-radius: 8px;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Time Until Event</h1>
-        
-        <div class="input-group">
-            <label for="datetimeInput">Select Date & Time:</label>
-            <input type="datetime-local" id="datetimeInput">
+        <header>
+            <h1>My Events</h1>
+        </header>
+
+        <div class="add-event-card">
+            <div class="input-group">
+                <label for="eventName">Event Name</label>
+                <input type="text" id="eventName" placeholder="e.g., Summer Vacation">
+            </div>
+            <div class="input-group">
+                <label for="eventDate">Date & Time</label>
+                <input type="datetime-local" id="eventDate">
+            </div>
+            <button class="add-btn" onclick="addEvent()">Add Event</button>
         </div>
 
-        <div id="countdown" class="countdown-grid">
-            <div class="time-box">
-                <span class="number" id="days">0</span>
-                <span class="label">Days</span>
+        <div id="eventsGrid" class="events-grid">
             </div>
-            <div class="time-box">
-                <span class="number" id="hours">0</span>
-                <span class="label">Hours</span>
-            </div>
-            <div class="time-box">
-                <span class="number" id="minutes">0</span>
-                <span class="label">Minutes</span>
-            </div>
-            <div class="time-box">
-                <span class="number" id="seconds">0</span>
-                <span class="label">Seconds</span>
-            </div>
-        </div>
-
-        <div id="message" class="message"></div>
     </div>
 
     <script>
-        const datetimeInput = document.getElementById('datetimeInput');
-        const countdownGrid = document.getElementById('countdown');
-        const messageDiv = document.getElementById('message');
-        
-        const els = {
-            days: document.getElementById('days'),
-            hours: document.getElementById('hours'),
-            minutes: document.getElementById('minutes'),
-            seconds: document.getElementById('seconds')
-        };
+        // --- State Management ---
+        let events = [];
 
-        let countdownInterval;
+        // Load from LocalStorage on startup
+        function loadEvents() {
+            const stored = localStorage.getItem('my_countdowns');
+            if (stored) {
+                events = JSON.parse(stored);
+                renderEvents();
+            } else {
+                renderEmptyState();
+            }
+        }
 
-        // Helper to format date for the input's "min" attribute (YYYY-MM-DDTHH:mm)
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        datetimeInput.min = now.toISOString().slice(0, 16);
+        function saveEvents() {
+            localStorage.setItem('my_countdowns', JSON.stringify(events));
+        }
 
-        datetimeInput.addEventListener('change', function() {
-            startCountdown(this.value);
-        });
+        // --- Core Logic ---
 
-        function startCountdown(targetDateStr) {
-            // Clear any existing interval
-            if (countdownInterval) clearInterval(countdownInterval);
+        function addEvent() {
+            const nameInput = document.getElementById('eventName');
+            const dateInput = document.getElementById('eventDate');
 
-            // If input is cleared, hide everything
-            if (!targetDateStr) {
-                countdownGrid.style.display = 'none';
-                messageDiv.style.display = 'none';
+            const name = nameInput.value.trim();
+            const dateStr = dateInput.value;
+
+            if (!name) {
+                alert("Please enter an event name.");
+                return;
+            }
+            if (!dateStr) {
+                alert("Please select a date and time.");
                 return;
             }
 
-            // Get target time in milliseconds
-            const targetTime = new Date(targetDateStr).getTime();
+            const newEvent = {
+                id: Date.now(), // simple unique ID
+                name: name,
+                date: dateStr
+            };
 
-            function update() {
-                const now = new Date().getTime();
-                const distance = targetTime - now;
-
-                // Check if time is up
-                if (distance < 0) {
-                    countdownGrid.style.display = 'none';
-                    messageDiv.style.display = 'block';
-                    messageDiv.textContent = "The event time has passed.";
-                    messageDiv.className = "message past";
-                    
-                    clearInterval(countdownInterval);
-                    return;
-                }
-
-                // Show grid, hide message
-                countdownGrid.style.display = 'grid';
-                messageDiv.style.display = 'none';
-
-                // Time calculations
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                // Update DOM with zero-padding (e.g., "05" instead of "5")
-                els.days.textContent = days;
-                els.hours.textContent = hours < 10 ? '0' + hours : hours;
-                els.minutes.textContent = minutes < 10 ? '0' + minutes : minutes;
-                els.seconds.textContent = seconds < 10 ? '0' + seconds : seconds;
-            }
-
-            // Run immediately, then every second
-            update();
-            countdownInterval = setInterval(update, 1000);
+            events.push(newEvent);
+            saveEvents();
+            
+            // Clear inputs
+            nameInput.value = '';
+            dateInput.value = '';
+            
+            renderEvents();
         }
+
+        function deleteEvent(id) {
+            if(confirm('Delete this countdown?')) {
+                events = events.filter(e => e.id !== id);
+                saveEvents();
+                if (events.length === 0) {
+                    renderEmptyState();
+                } else {
+                    renderEvents();
+                }
+            }
+        }
+
+        // --- Rendering ---
+
+        function renderEmptyState() {
+            const grid = document.getElementById('eventsGrid');
+            grid.innerHTML = `<div class="empty-state">No countdowns running. Add one above!</div>`;
+        }
+
+        function renderEvents() {
+            const grid = document.getElementById('eventsGrid');
+            grid.innerHTML = '';
+
+            // Sort events by date (nearest first)
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            events.forEach(event => {
+                const dateObj = new Date(event.date);
+                const dateDisplay = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                const card = document.createElement('div');
+                card.className = 'event-card';
+                card.innerHTML = `
+                    <div class="event-header">
+                        <div>
+                            <h3 class="event-title">${event.name}</h3>
+                            <div class="event-date">${dateDisplay}</div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteEvent(${event.id})">&times;</button>
+                    </div>
+                    <div id="timer-${event.id}" class="timer-wrapper">
+                        </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Trigger an immediate update so users don't wait 1 second
+            updateTimers();
+        }
+
+        // --- The Ticking Heart ---
+
+        function updateTimers() {
+            const now = new Date().getTime();
+
+            events.forEach(event => {
+                const target = new Date(event.date).getTime();
+                const distance = target - now;
+                const container = document.getElementById(`timer-${event.id}`);
+
+                if (!container) return; // safety check
+
+                if (distance < 0) {
+                    container.innerHTML = `<div class="event-finished">Event Passed</div>`;
+                } else {
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    // Helper for zero padding
+                    const pad = (num) => num < 10 ? '0'+num : num;
+
+                    container.innerHTML = `
+                        <div class="timer-display">
+                            <div class="time-unit">
+                                <span class="unit-value">${days}</span>
+                                <span class="unit-label">Days</span>
+                            </div>
+                            <div class="time-unit">
+                                <span class="unit-value">${pad(hours)}</span>
+                                <span class="unit-label">Hrs</span>
+                            </div>
+                            <div class="time-unit">
+                                <span class="unit-value">${pad(minutes)}</span>
+                                <span class="unit-label">Min</span>
+                            </div>
+                            <div class="time-unit">
+                                <span class="unit-value">${pad(seconds)}</span>
+                                <span class="unit-label">Sec</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Initialize
+        // Set min date on input to today
+        const nowLocal = new Date();
+        nowLocal.setMinutes(nowLocal.getMinutes() - nowLocal.getTimezoneOffset());
+        document.getElementById('eventDate').min = nowLocal.toISOString().slice(0, 16);
+
+        loadEvents();
+        
+        // Update all timers every second
+        setInterval(updateTimers, 1000);
+
     </script>
 </body>
 </html>
