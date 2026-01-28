@@ -103,14 +103,22 @@
 
         /* --- APP CONTENT (Hidden initially) --- */
         #appContent {
-            display: none; /* Hidden until unlocked */
+            display: none; 
         }
 
-        /* [Rest of the Styles from previous version] */
-        .container { max-width: 600px; margin: 0 auto; padding-bottom: 50px; }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            padding-bottom: 50px;
+            /* Default Mobile Width */
+            max-width: 600px; 
+            transition: max-width 0.3s ease;
+        }
+
         header { text-align: center; margin-bottom: 2rem; margin-top: 1rem; }
         h1 { margin: 0; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem; }
         .live-clock { font-size: 2rem; font-weight: 800; color: var(--text-main); line-height: 1.1; }
+        
         .add-event-card { background: var(--card-bg); padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; border-top: 4px solid var(--primary); }
         .input-group { margin-bottom: 1rem; }
         label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; }
@@ -118,17 +126,62 @@
         input.app-input:focus { border-color: var(--primary); outline: none; }
         button.add-btn { background-color: var(--primary); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1rem; font-weight: 700; width: 100%; cursor: pointer; margin-top: 0.5rem; box-shadow: 0 4px 6px rgba(218, 0, 55, 0.2); }
         button.add-btn:active { transform: scale(0.98); }
-        .events-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-        .event-card { background: var(--card-bg); border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; border-left: 4px solid transparent; }
+
+        /* --- RESPONSIVE GRID --- */
+        .events-grid {
+            display: grid;
+            gap: 1rem;
+            /* Default Mobile: 1 Column */
+            grid-template-columns: 1fr; 
+        }
+
+        .event-card { background: var(--card-bg); border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; border-left: 4px solid transparent; transition: transform 0.2s; }
+        .event-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-left-color: var(--primary); }
+
         .event-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-        .event-title { font-size: 1.2rem; font-weight: 700; margin: 0; }
+        .event-title { font-size: 1.2rem; font-weight: 700; margin: 0; word-break: break-word; }
         .event-date { font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-top: 0.25rem; }
-        .delete-btn { background: none; border: none; color: #d1d5db; font-size: 1.5rem; padding: 0 0 0 1rem; }
+        .delete-btn { background: none; border: none; color: #d1d5db; font-size: 1.5rem; padding: 0 0 0 1rem; cursor: pointer; }
+        .delete-btn:hover { color: var(--primary); }
+
         .timer-display { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.25rem; text-align: center; background: #fff1f2; padding: 0.75rem 0.25rem; border-radius: 8px; }
         .unit-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
         .unit-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); }
-        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-style: italic; border: 2px dashed #e5e5e5; border-radius: 12px; }
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-style: italic; border: 2px dashed #e5e5e5; border-radius: 12px; }
         .event-finished { text-align: center; color: #16a34a; font-weight: bold; padding: 0.5rem; background: #dcfce7; border-radius: 8px; }
+
+        /* --- DESKTOP MEDIA QUERY --- */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 1000px; /* Wider container for desktop */
+                padding: 2rem;
+            }
+
+            .events-grid {
+                /* Create as many 300px columns as fit */
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+                gap: 1.5rem;
+            }
+
+            .add-event-card {
+                /* Make the input form horizontal on desktop */
+                flex-direction: row;
+                display: flex;
+                gap: 1rem;
+                align-items: flex-end;
+            }
+            
+            .input-group {
+                margin-bottom: 0;
+                flex: 1;
+            }
+            
+            button.add-btn {
+                width: auto;
+                margin-top: 0;
+                min-width: 150px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -175,7 +228,6 @@
         const pinInput = document.getElementById('pinInput');
         const loginError = document.getElementById('loginError');
 
-        // Check PIN on Enter key
         pinInput.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 checkPin();
@@ -184,13 +236,10 @@
 
         function checkPin() {
             if (pinInput.value === APP_PIN) {
-                // Success
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('appContent').style.display = 'block';
-                // Initialize app
                 initApp();
             } else {
-                // Fail
                 loginError.style.display = 'block';
                 pinInput.value = '';
                 pinInput.focus();
@@ -199,15 +248,13 @@
 
         // --- APP LOGIC ---
         function initApp() {
-            // Set min date
             const nowLocal = new Date();
             nowLocal.setMinutes(nowLocal.getMinutes() - nowLocal.getTimezoneOffset());
             document.getElementById('eventDate').min = nowLocal.toISOString().slice(0, 16);
 
             loadEvents();
-            // Start clock and timers
             setInterval(updateTimers, 1000);
-            updateTimers(); // immediate run
+            updateTimers(); 
         }
 
         function loadEvents() {
